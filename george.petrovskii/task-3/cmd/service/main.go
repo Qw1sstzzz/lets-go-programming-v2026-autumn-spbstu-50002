@@ -40,6 +40,7 @@ type Valute struct {
 }
 
 type ValCurs struct {
+	XMLName xml.Name `xml:"ValCurs"`
 	Valutes []Valute `xml:"Valute"`
 }
 
@@ -47,20 +48,27 @@ func main() {
 	configPath := flag.String("config", "", "path to config file")
 	flag.Parse()
 
+	if *configPath == "" {
+		panic("config path is not set, use --config")
+	}
+
 	data, err := os.ReadFile(*configPath)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("read config: %w", err))
 	}
 
 	var cfg Config
-	err = yaml.Unmarshal(data, &cfg)
-	if err != nil {
-		panic(err)
+	if err = yaml.Unmarshal(data, &cfg); err != nil {
+		panic(fmt.Errorf("parse config: %w", err))
+	}
+
+	if cfg.InputFile == "" || cfg.OutputFile == "" {
+		panic("config must contain input-file and output-file")
 	}
 
 	xmlFile, err := os.Open(cfg.InputFile)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("open input file: %w", err))
 	}
 	defer xmlFile.Close()
 
@@ -68,9 +76,8 @@ func main() {
 	decoder.CharsetReader = charset.NewReaderLabel
 
 	var curs ValCurs
-	err = decoder.Decode(&curs)
-	if err != nil {
-		panic(err)
+	if err = decoder.Decode(&curs); err != nil {
+		panic(fmt.Errorf("decode xml: %w", err))
 	}
 
 	sort.SliceStable(curs.Valutes, func(i, j int) bool {
