@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -71,6 +72,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	sort.SliceStable(curs.Valutes, func(i, j int) bool {
+		return curs.Valutes[i].Value > curs.Valutes[j].Value
+	})
 
 	fmt.Println("valutes count:", len(curs.Valutes))
 
