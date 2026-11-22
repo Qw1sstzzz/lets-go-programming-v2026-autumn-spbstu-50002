@@ -1,4 +1,4 @@
-module task-3
+module george.petrovskii/task-3
 
 go 1.27.1
 
