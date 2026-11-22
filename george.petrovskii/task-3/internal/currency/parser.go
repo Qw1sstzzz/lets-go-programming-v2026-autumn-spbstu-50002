@@ -1,6 +1,7 @@
 package currency
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -14,13 +15,12 @@ type valCurs struct {
 }
 
 func Load(path string) ([]Currency, error) {
-	file, err := os.Open(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("open input file: %w", err)
+		return nil, fmt.Errorf("read input file: %w", err)
 	}
-	defer file.Close()
 
-	decoder := xml.NewDecoder(file)
+	decoder := xml.NewDecoder(bytes.NewReader(data))
 	decoder.CharsetReader = charset.NewReaderLabel
 
 	var curs valCurs

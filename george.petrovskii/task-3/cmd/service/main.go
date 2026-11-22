@@ -3,11 +3,14 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"george.petrovskii/task-3/internal/config"
 	"george.petrovskii/task-3/internal/currency"
 	"george.petrovskii/task-3/internal/writer"
 )
+
+var errConfigPathNotSet = errors.New("config path is not set, use --config")
 
 func main() {
 	if err := run(); err != nil {
@@ -20,20 +23,24 @@ func run() error {
 	flag.Parse()
 
 	if *configPath == "" {
-		return errors.New("config path is not set, use --config")
+		return errConfigPathNotSet
 	}
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("load config: %w", err)
 	}
 
 	currencies, err := currency.Load(cfg.InputFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("load currencies: %w", err)
 	}
 
 	currency.SortByValueDesc(currencies)
 
-	return writer.WriteJSON(cfg.OutputFile, currencies)
+	if err := writer.WriteJSON(cfg.OutputFile, currencies); err != nil {
+		return fmt.Errorf("write result: %w", err)
+	}
+
+	return nil
 }
